@@ -51,58 +51,53 @@ function searchCity(city) {
 function find(response) {
     let lat = response.data.coord.lat;
     let lon = response.data.coord.lon;
-    let apiUrl = "https://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&appid=f3887e262c88d1158f7e2ef4998e234c&units=metric";
+    let h2 = document.querySelector("h2");
+    h2.innerHTML = response.data.name;
+    let apiUrl = "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&appid=f3887e262c88d1158f7e2ef4998e234c&units=metric";
     axios.get(apiUrl).then(getTempq);
+    forecast(response.data.coord);
     
 }
 function getTempq(response) {
-    ff.classList.remove("active");
-    cc.classList.add("active");
+   
     let temp = document.querySelector("#now");
-    let low = document.querySelector("#low");
-    let high = document.querySelector("#high");
     let humidity = document.querySelector("#humidity");
     let wind = document.querySelector("#wind");
     let status = document.querySelector("#descript");
-    let h2 = document.querySelector("h2");
-    let pic = response.data.weather[0].icon;
+    let pic = response.data.current.weather[0].icon;
     let datetime = document.querySelector("#update");
-    h2.innerHTML = response.data.name;
-    cTemp = response.data.main.temp;
+    cTemp = response.data.current.temp;
     temp.innerHTML = Math.round(cTemp) ;
-    status.innerHTML=response.data.weather[0].description;
-    low.innerHTML = "L: " + Math.round(response.data.main.temp_min) + "&ordm;";
-    high.innerHTML = "H: " + Math.round(response.data.main.temp_max) + "&ordm;";
-    humidity.innerHTML = "Humidity: " + response.data.main.humidity + "  %";
-    wind.innerHTML = "Wind: " + response.data.wind.speed+ "  km/h";
+    status.innerHTML=response.data.current.weather[0].description;
+    humidity.innerHTML = "Humidity: " + response.data.current.humidity + "  %";
+    wind.innerHTML = "Wind: " + Math.round(response.data.current.wind_speed) + "  km/h";
     document.getElementById("status-pic").src = "http://openweathermap.org/img/wn/" + pic + "@2x.png";
-    datetime.innerHTML = convertDate(response.data.dt * 1000);
+    datetime.innerHTML = convertDate(response.data.current.dt * 1000);
     
 }
 
 
 
-
-
-
-let ff = document.querySelector("#fahrenheit");
-ff.addEventListener("click", toFahrenheit);
-function toFahrenheit(event) {
-    event.preventDefault();
-    let tempC = document.querySelector("#now");
-    tempC.innerHTML = Math.round((cTemp * 9) / 5 + 32);
-    cc.classList.remove("active");
-    ff.classList.add("active");
-    
-    
+function forecast(coord) {
+    let lat = coord.lat;
+    let lon = coord.lon;
+    let apiUr =
+  "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&appid=f3887e262c88d1158f7e2ef4998e234c&units=metric";
+    axios.get(apiUr).then(showf);
 }
 
-let cc = document.querySelector("#celsius");
-cc.addEventListener("click", toCelsius);
-function toCelsius(event) {
-    event.preventDefault();
-    let temp = document.querySelector("#now");
-    ff.classList.remove("active");
-    cc.classList.add("active");
-    temp.innerHTML =Math.round( cTemp);
+function showf(response) {
+     document
+        .querySelectorAll(".col-2")
+        .forEach(function (element, index) {
+            let day = new Date(response.data.daily[index].dt*1000);
+            let x = new Date(day);
+            element.querySelector("#day").innerHTML = convertDay(x);
+            let pic = response.data.daily[index].weather[0].icon;
+            element.querySelector("#pic").src = "http://openweathermap.org/img/wn/" + pic + "@2x.png";
+            let temp = Math.round(response.data.daily[index].temp.min) + "&ordm;<strong> " + Math.round(response.data.daily[index].temp.max) + "&ordm;</strong>";
+            element.querySelector(".temp1").innerHTML = temp;
+
+
+        });
 }
